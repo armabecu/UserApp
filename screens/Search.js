@@ -85,41 +85,88 @@ export default function Search() {
 
   const getAllCars = async (newCity) => {
     try {
-      const querySnapshot = await getDocs(collection(db, "cars"));
+      const querySnapshot = await getDocs(collection(db, "owners"));
 
-      const resultsFromFirestore = []
+      const resultsFromFirestore = [];
 
-      for (let doc of querySnapshot.docs) {
-        let carCity = await doForwardGeocode(doc.data().location);
+      for (let ownerDoc of querySnapshot.docs) {
+        const ownerID = ownerDoc.id;
+
+        const carsSnapshot = await getDocs(collection(db, "owners", ownerID, "listings"));
+
+        for (let carDoc of carsSnapshot.docs) {
+          let carCity = await doForwardGeocode(carDoc.data().location);
+
+          if (carCity == newCity) {
+            console.log(`Current City is ${newCity}, Car city is ${carCity}`)
+
+            let markerCoords = await doForwardGeocodeForMarker(carDoc.data().location)
+
+            const itemToAdd = {
+              id: carDoc.id,
+              ...markerCoords,
+              efficiency: carDoc.data().efficiency,
+              license: carDoc.data().license,
+              name: carDoc.data().name,
+              price: carDoc.data().price,
+              range: carDoc.data().range,
+              seating: carDoc.data().seating
 
 
-        if (carCity == newCity) {
-          console.log(`Current City is ${newCity}, Car city is ${carCity}`)
+            }
 
-          let markerCoords = await doForwardGeocodeForMarker(doc.data().location)
-
-          const itemToAdd = {
-            id: doc.id,
-            ...markerCoords
+            resultsFromFirestore.push(itemToAdd)
+          } else {
+            console.log(` WRONG Current City is ${newCity}, Car city is ${carCity}`)
           }
-
-
-          resultsFromFirestore.push(itemToAdd)
-
-
-        } else {
-          console.log(` WRONG Current City is ${newCity}, Car city is ${carCity}`)
-
         }
       }
 
       setMarkers(resultsFromFirestore)
 
-
     } catch (err) {
       console.log(err);
     }
   };
+
+
+  // const getAllCars = async (newCity) => {
+  //   try {
+  //     const querySnapshot = await getDocs(collection(db, "cars"));
+
+  //     const resultsFromFirestore = []
+
+  //     for (let doc of querySnapshot.docs) {
+  //       let carCity = await doForwardGeocode(doc.data().location);
+
+
+  //       if (carCity == newCity) {
+  //         console.log(`Current City is ${newCity}, Car city is ${carCity}`)
+
+  //         let markerCoords = await doForwardGeocodeForMarker(doc.data().location)
+
+  //         const itemToAdd = {
+  //           id: doc.id,
+  //           ...markerCoords
+  //         }
+
+
+  //         resultsFromFirestore.push(itemToAdd)
+
+
+  //       } else {
+  //         console.log(` WRONG Current City is ${newCity}, Car city is ${carCity}`)
+
+  //       }
+  //     }
+
+  //     setMarkers(resultsFromFirestore)
+
+
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
 
   const doForwardGeocode = async (address) => {
     try {
@@ -219,17 +266,17 @@ export default function Search() {
                   coordinate={coords}
                   title={currMarker.name}
                   description={currMarker.desc}
-                />
+
+                >
+                  <View style={{ backgroundColor: "white", padding: 10,borderRadius: 50 }}>
+                    <Text style={{ color: 'black',fontWeight: 'bold' }}>${currMarker.price}</Text>
+                  </View>
+
+                </Marker>
               )
             }
           )
         }
-
-
-
-
-
-
       </MapView>
     </View>
   );
