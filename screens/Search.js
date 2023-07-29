@@ -7,8 +7,6 @@ import { useIsFocused } from '@react-navigation/native';
 import { db } from "../firebaseConfig";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
-
-
 export default function Search() {
 
   const isFocused = useIsFocused();
@@ -18,21 +16,7 @@ export default function Search() {
 
   const [city, setCity] = useState("")
 
-  const [cities, setCities] = useState([]);
-
-  useEffect(() => {
-    if (isFocused) {
-      // Your function here. This will run each time the screen comes into focus.
-      getCurrentLocation()
-
-    }
-  }, [isFocused]);
-
-  // useEffect(() => {
-  //   if(city){
-  //     alert(city);
-  //   }
-  // }, [city])
+  const [marker, setMarkers] = useState([]);
 
   const getCurrentLocation = async () => {
     try {
@@ -68,45 +52,76 @@ export default function Search() {
 
       let newCity = result.city
 
-      setCity(newCity)
-
-      getAllCars()
-
+      setAndFetchCars(newCity)
 
     } catch (err) {
       console.log(err)
     }
   }
 
-  const getAllCars = async () => {
+  // Call getCurrentLocation once when the component is mounted
+  useEffect(() => {
+    getCurrentLocation();
+  }, []);
+
+  useEffect(() => {
+    // Call getCurrentLocation when the screen gains focus
+    if (isFocused) {
+      getCurrentLocation();
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
+    console.log(marker);
+  }, [marker]);
+
+
+  const setAndFetchCars = async (newCity) => {
+    setCity(newCity);
+    // Ensure the city state is updated before fetching the cars
+    await getAllCars(newCity);
+  }
+
+
+  const getAllCars = async (newCity) => {
     try {
       const querySnapshot = await getDocs(collection(db, "cars"));
-  
+
+      const resultsFromFirestore = []
+
       for (let doc of querySnapshot.docs) {
         let carCity = await doForwardGeocode(doc.data().location);
-        // console.log(carCity)
-        // console.log(city)
-  
-        if (carCity == city) {
-          // your logic here
-          console.log("RIGHT");
+
+
+        if (carCity == newCity) {
+          console.log(`Current City is ${newCity}, Car city is ${carCity}`)
+
+          let markerCoords = await doForwardGeocodeForMarker(doc.data().location)
+
+          const itemToAdd = {
+            id: doc.id,
+            ...markerCoords
+          }
+
+
+          resultsFromFirestore.push(itemToAdd)
+
+
         } else {
-          console.log(carCity)
-        console.log(city)
-          console.log("WRONG");
+          console.log(` WRONG Current City is ${newCity}, Car city is ${carCity}`)
+
         }
       }
+
+      setMarkers(resultsFromFirestore)
+
+
     } catch (err) {
       console.log(err);
     }
   };
-  
-  
 
-
-  const doForwardGeocode = async(address) => {
-
-
+  const doForwardGeocode = async (address) => {
     try {
       // 1. Do forward geocode
       const geocodedLocation = await Location.geocodeAsync(address)
@@ -119,61 +134,59 @@ export default function Search() {
       }
 
       const coords = {
-        latitude:result.latitude ,
-        longitude:result.longitude 
-     }
+        latitude: result.latitude,
+        longitude: result.longitude
+      }
 
-     let city = await doReverseGeocode(coords)
+      let city = await doReverseGeocode(coords)
 
-     return city 
-     
-
-      // // 3. If yes, extract relevant data
-      // console.log(`Latitude: ${result.latitude}`)
-      // console.log(`Longitude: ${result.longitude}`)
-
-
+      return city
     } catch (err) {
       console.log(err)
     }
   }
 
-  
-
   const doReverseGeocode = async (coordinates) => {
-
     try {
-
-      const postalAddresses
-        = await Location.reverseGeocodeAsync(coordinates, {})
-
+      const postalAddresses = await Location.reverseGeocodeAsync(coordinates, {})
       const result = postalAddresses[0]
-
-
       if (result === undefined) {
         alert("No results found.")
         return
       }
-
-
       return result.city
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
+  const doForwardGeocodeForMarker = async (address) => {
+    try {
+      // 1. Do forward geocode
+      const geocodedLocation = await Location.geocodeAsync(address)
+
+      // 2. Check if a matching location is found
+      const result = geocodedLocation[0]
+      if (result === undefined) {
+        alert("No coordinates found")
+        return
+      }
+
+      const coords = {
+        latitude: result.latitude,
+        longitude: result.longitude
+      }
+
+      return coords
 
     } catch (err) {
       console.log(err)
     }
-
-
   }
-
-
 
   return (
     <View style={Styles.screen}>
       <Text style={{ color: 'white' }}>  Search Screen</Text>
-
-
-
       <MapView
         ref={ref => { mapViewRef = ref; }}
         style={{ height: "50%", width: "100%" }}
@@ -183,11 +196,41 @@ export default function Search() {
           latitudeDelta: 0.1,
           longitudeDelta: 0.1,
         }}
-      ></MapView>
+      >
+
+        {
+
+
+          marker.map(
+            // this function will run once per item in the MARKERS_ARRAY
+            (currMarker, index) => {
+              // 1. debug information
+              console.log(`Marker Index: ${index}`)
+              console.log(currMarker)
+              // 2. create coordinate where marker should be displayed
+              const coords = {
+                latitude: currMarker.latitude,
+                longitude: currMarker.longitude
+              }
+              // 3. define UI for the marker
+              return (
+                <Marker
+                  key={index}
+                  coordinate={coords}
+                  title={currMarker.name}
+                  description={currMarker.desc}
+                />
+              )
+            }
+          )
+        }
 
 
 
 
+
+
+      </MapView>
     </View>
   );
 }
