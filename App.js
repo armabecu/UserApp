@@ -3,7 +3,6 @@ import { StyleSheet, Text, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Search from "./screens/Search";
-import Bookings from "./screens/Registrations";
 import { Ionicons } from "@expo/vector-icons";
 import { Theme } from "./Theme";
 import Styles from "./Styles";
@@ -12,6 +11,8 @@ import Login from "./screens/Login";
 import { useState } from "react";
 import { useEffect } from "react";
 import Registrations from "./screens/Registrations";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import BookingDetail from "./screens/BookingDetail";
 const Tab = createBottomTabNavigator();
 
 export default function App() {
@@ -34,6 +35,26 @@ export default function App() {
   if (!user) {
     return <Login />;
   }
+
+  const BookingsStack = createNativeStackNavigator();
+  function BookingsStackScreen() {
+    return (
+      <BookingsStack.Navigator>
+        <BookingsStack.Screen
+          name="Registrations"
+          component={Registrations}
+          options={{ headerShown: false }}
+        />
+        <BookingsStack.Screen
+          name="BookingDetail"
+          component={BookingDetail}
+          options={{ headerShown: false }}
+        />
+      </BookingsStack.Navigator>
+    );
+  }
+
+
   return (
     <NavigationContainer theme={Theme}>
       <Tab.Navigator
@@ -54,7 +75,7 @@ export default function App() {
         })}
       >
         <Tab.Screen name="Search" component={Search} />
-        <Tab.Screen name="Registrations" component={Registrations} />
+        <Tab.Screen name="Registrations" component={BookingsStackScreen} />
       </Tab.Navigator>
     </NavigationContainer>
   );

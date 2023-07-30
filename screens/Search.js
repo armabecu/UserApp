@@ -13,7 +13,8 @@ import MapView, { Marker, Callout } from "react-native-maps";
 import React, { useEffect, useState } from "react";
 import { useIsFocused } from "@react-navigation/native";
 import { db } from "../firebaseConfig";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { collection, getDocs, query, where, addDoc, setDoc, doc, updateDoc } from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -115,8 +116,10 @@ export default function Search() {
               carDoc.data().location
             );
 
-            // Extract URLs from the "Images" field
-            //const imageUrls = carDoc.data().images.map((imageObj) => imageObj.url_full);
+            const ownerInfo = {
+              id:ownerID,
+              name: ownerDoc.data().name
+            }
 
             const itemToAdd = {
               id: carDoc.id,
@@ -128,7 +131,12 @@ export default function Search() {
               price: carDoc.data().price,
               range: carDoc.data().range,
               seating: carDoc.data().seating,
+              location:carDoc.data().location,
               images: carDoc.data().images.map((imageObj) => imageObj.url_full),
+              owner:ownerInfo,
+              status:carDoc.data().status,
+              bookingDate:carDoc.data().bookingDate,
+              confirmation:carDoc.data().confirmation
             };
 
             resultsFromFirestore.push(itemToAdd);
@@ -256,6 +264,53 @@ export default function Search() {
     setModalVisible(false);
     setSelectedMarker(null);
   };
+
+
+  const bookNow = async() =>{
+
+    const authUser = getAuth().currentUser;
+
+    let futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + Math.floor(Math.random() * 365) + 1);
+
+    if (authUser != null) {
+      const bookingToAdd = {
+        name: selectedMarker.name,
+        license: selectedMarker.license,
+        location: selectedMarker.location,
+        seating: selectedMarker.seating,
+        efficiency: selectedMarker.efficiency,
+        range: selectedMarker.efficiency,
+        price: selectedMarker.price,
+        status: "Needs Approval",
+        images: selectedMarker.images,
+        horsepower: selectedMarker.horsepower,
+        owner:selectedMarker.owner,
+        bookingDate:futureDate,
+        confirmation:""
+        
+      };
+      try {
+        await setDoc(
+          doc(collection(db, "renters", authUser.uid, "bookings"), selectedMarker.id),
+          bookingToAdd
+        );
+
+        await updateDoc(
+          doc(collection(db, 'owners', selectedMarker.owner.id,'listings'),selectedMarker.id ),
+          { status: "Needs Approval", bookingDate:futureDate }
+        );
+
+        alert("Added to Bookings list, you need to wait for owner confirmation");
+      } catch (error) {
+        alert("Error!", error.message);
+        console.log(error);
+      }
+    } else {
+      // handle case when user is not logged in
+    }
+
+  }
 
   return (
     <View>
@@ -423,7 +478,7 @@ export default function Search() {
                   </Text>
                   <Text style={{ color: "#999", fontSize: 20 }}>/week</Text>
                 </View>
-                <Pressable>
+                <Pressable onPress={bookNow}>
                   <View
                     style={{
                       backgroundColor: "#111",
@@ -481,25 +536,3 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
-
-// <View style={styles.modalContainer}>
-//           <View style={styles.modalContent}>
-//             {selectedMarker && (
-//               <View>
-//                 <Image
-//                   style={{ width: "100%", height: 250 }}
-//                   source={{ uri: selectedMarker.images[0] }}
-//                 ></Image>
-//                 <Text style={{ fontWeight: "bold", fontSize: 16 }}>
-//                   {selectedMarker.name}
-//                 </Text>
-//                 <Text>Description: {selectedMarker.desc}</Text>
-//                 <Text>Price: ${selectedMarker.price}</Text>
-//                 {/* Add more details as needed */}
-//                 <Pressable onPress={closeModal} style={styles.closeButton}>
-//                   <Text style={{ color: "white" }}>Close</Text>
-//                 </Pressable>
-//               </View>
-//             )}
-//           </View>
-//         </View>
