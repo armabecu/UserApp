@@ -48,8 +48,19 @@ export default function App() {
             }
             return <Ionicons name={iconName} size={size} color={color} />;
           },
-          tabBarActiveTintColor: "white",
+          tabBarActiveTintColor: "black",
           tabBarInactiveTintColor: "gray",
+          headerShown: false,
+          tabBarStyle: {
+            position: "absolute",
+            bottom: 20,
+            left: 20,
+            right: 20,
+            elevation: 0,
+            backgroundColor: "#fff",
+            borderRadius: 15,
+            height: 70,
+          },
         })}
       >
         <Tab.Screen name="Search" component={Search} />

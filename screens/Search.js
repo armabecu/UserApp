@@ -1,20 +1,19 @@
 import { Text, StyleSheet, View } from "react-native";
 import Styles from "../Styles";
-import * as Location from 'expo-location';
-import MapView, { Marker } from 'react-native-maps';
-import { useEffect, useState } from 'react';
-import { useIsFocused } from '@react-navigation/native';
+import * as Location from "expo-location";
+import MapView, { Marker } from "react-native-maps";
+import { useEffect, useState } from "react";
+import { useIsFocused } from "@react-navigation/native";
 import { db } from "../firebaseConfig";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
 export default function Search() {
-
   const isFocused = useIsFocused();
 
-  const [latFromUI, setLatFromUI] = useState("43.676410")
-  const [lngFromUI, setLngFromUI] = useState("-79.410150")
+  const [latFromUI, setLatFromUI] = useState("43.676410");
+  const [lngFromUI, setLngFromUI] = useState("-79.410150");
 
-  const [city, setCity] = useState("")
+  const [city, setCity] = useState("");
 
   const [marker, setMarkers] = useState([]);
 
@@ -22,42 +21,41 @@ export default function Search() {
     try {
       // 1. get permissions
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        alert(`Permission to access location was denied`)
-        return
+      if (status !== "granted") {
+        alert(`Permission to access location was denied`);
+        return;
       }
       // 2. if permission granted, then get the location
       // - The first time, this can take 5-30 seconds to complete
       let location = await Location.getCurrentPositionAsync();
 
-      let newLat = location.coords.latitude
-      let newLng = location.coords.longitude
+      let newLat = location.coords.latitude;
+      let newLng = location.coords.longitude;
 
-      setLatFromUI(newLat)
-      setLngFromUI(newLng)
+      setLatFromUI(newLat);
+      setLngFromUI(newLng);
 
       const coords = {
         latitude: parseFloat(newLat),
         longitude: parseFloat(newLng),
-      }
+      };
 
-      const postalAddresses = await Location.reverseGeocodeAsync(coords, {})
+      const postalAddresses = await Location.reverseGeocodeAsync(coords, {});
 
-      const result = postalAddresses[0]
+      const result = postalAddresses[0];
 
       if (result === undefined) {
-        alert("No results found.")
-        return
+        alert("No results found.");
+        return;
       }
 
-      let newCity = result.city
+      let newCity = result.city;
 
-      setAndFetchCars(newCity)
-
+      setAndFetchCars(newCity);
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
   // Call getCurrentLocation once when the component is mounted
   useEffect(() => {
@@ -75,13 +73,11 @@ export default function Search() {
     console.log(marker);
   }, [marker]);
 
-
   const setAndFetchCars = async (newCity) => {
     setCity(newCity);
     // Ensure the city state is updated before fetching the cars
     await getAllCars(newCity);
-  }
-
+  };
 
   const getAllCars = async (newCity) => {
     try {
@@ -92,15 +88,19 @@ export default function Search() {
       for (let ownerDoc of querySnapshot.docs) {
         const ownerID = ownerDoc.id;
 
-        const carsSnapshot = await getDocs(collection(db, "owners", ownerID, "listings"));
+        const carsSnapshot = await getDocs(
+          collection(db, "owners", ownerID, "listings")
+        );
 
         for (let carDoc of carsSnapshot.docs) {
           let carCity = await doForwardGeocode(carDoc.data().location);
 
           if (carCity == newCity) {
-            console.log(`Current City is ${newCity}, Car city is ${carCity}`)
+            console.log(`Current City is ${newCity}, Car city is ${carCity}`);
 
-            let markerCoords = await doForwardGeocodeForMarker(carDoc.data().location)
+            let markerCoords = await doForwardGeocodeForMarker(
+              carDoc.data().location
+            );
 
             const itemToAdd = {
               id: carDoc.id,
@@ -110,25 +110,23 @@ export default function Search() {
               name: carDoc.data().name,
               price: carDoc.data().price,
               range: carDoc.data().range,
-              seating: carDoc.data().seating
+              seating: carDoc.data().seating,
+            };
 
-
-            }
-
-            resultsFromFirestore.push(itemToAdd)
+            resultsFromFirestore.push(itemToAdd);
           } else {
-            console.log(` WRONG Current City is ${newCity}, Car city is ${carCity}`)
+            console.log(
+              ` WRONG Current City is ${newCity}, Car city is ${carCity}`
+            );
           }
         }
       }
 
-      setMarkers(resultsFromFirestore)
-
+      setMarkers(resultsFromFirestore);
     } catch (err) {
       console.log(err);
     }
   };
-
 
   // const getAllCars = async (newCity) => {
   //   try {
@@ -138,7 +136,6 @@ export default function Search() {
 
   //     for (let doc of querySnapshot.docs) {
   //       let carCity = await doForwardGeocode(doc.data().location);
-
 
   //       if (carCity == newCity) {
   //         console.log(`Current City is ${newCity}, Car city is ${carCity}`)
@@ -150,9 +147,7 @@ export default function Search() {
   //           ...markerCoords
   //         }
 
-
   //         resultsFromFirestore.push(itemToAdd)
-
 
   //       } else {
   //         console.log(` WRONG Current City is ${newCity}, Car city is ${carCity}`)
@@ -162,7 +157,6 @@ export default function Search() {
 
   //     setMarkers(resultsFromFirestore)
 
-
   //   } catch (err) {
   //     console.log(err);
   //   }
@@ -171,72 +165,75 @@ export default function Search() {
   const doForwardGeocode = async (address) => {
     try {
       // 1. Do forward geocode
-      const geocodedLocation = await Location.geocodeAsync(address)
+      const geocodedLocation = await Location.geocodeAsync(address);
 
       // 2. Check if a matching location is found
-      const result = geocodedLocation[0]
+      const result = geocodedLocation[0];
       if (result === undefined) {
-        alert("No coordinates found")
-        return
+        alert("No coordinates found");
+        return;
       }
 
       const coords = {
         latitude: result.latitude,
-        longitude: result.longitude
-      }
+        longitude: result.longitude,
+      };
 
-      let city = await doReverseGeocode(coords)
+      let city = await doReverseGeocode(coords);
 
-      return city
+      return city;
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
   const doReverseGeocode = async (coordinates) => {
     try {
-      const postalAddresses = await Location.reverseGeocodeAsync(coordinates, {})
-      const result = postalAddresses[0]
+      const postalAddresses = await Location.reverseGeocodeAsync(
+        coordinates,
+        {}
+      );
+      const result = postalAddresses[0];
       if (result === undefined) {
-        alert("No results found.")
-        return
+        alert("No results found.");
+        return;
       }
-      return result.city
+      return result.city;
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
   const doForwardGeocodeForMarker = async (address) => {
     try {
       // 1. Do forward geocode
-      const geocodedLocation = await Location.geocodeAsync(address)
+      const geocodedLocation = await Location.geocodeAsync(address);
 
       // 2. Check if a matching location is found
-      const result = geocodedLocation[0]
+      const result = geocodedLocation[0];
       if (result === undefined) {
-        alert("No coordinates found")
-        return
+        alert("No coordinates found");
+        return;
       }
 
       const coords = {
         latitude: result.latitude,
-        longitude: result.longitude
-      }
+        longitude: result.longitude,
+      };
 
-      return coords
-
+      return coords;
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
   return (
-    <View style={Styles.screen}>
-      <Text style={{ color: 'white' }}>  Search Screen</Text>
+    <View>
       <MapView
-        ref={ref => { mapViewRef = ref; }}
-        style={{ height: "50%", width: "100%" }}
+        ref={(ref) => {
+          mapViewRef = ref;
+        }}
+        style={{ height: "100%", width: "100%" }}
         initialRegion={{
           latitude: latFromUI,
           longitude: lngFromUI,
@@ -244,39 +241,40 @@ export default function Search() {
           longitudeDelta: 0.1,
         }}
       >
-
-        {
-
-
-          marker.map(
-            // this function will run once per item in the MARKERS_ARRAY
-            (currMarker, index) => {
-              // 1. debug information
-              console.log(`Marker Index: ${index}`)
-              console.log(currMarker)
-              // 2. create coordinate where marker should be displayed
-              const coords = {
-                latitude: currMarker.latitude,
-                longitude: currMarker.longitude
-              }
-              // 3. define UI for the marker
-              return (
-                <Marker
-                  key={index}
-                  coordinate={coords}
-                  title={currMarker.name}
-                  description={currMarker.desc}
-
+        {marker.map(
+          // this function will run once per item in the MARKERS_ARRAY
+          (currMarker, index) => {
+            // 1. debug information
+            console.log(`Marker Index: ${index}`);
+            console.log(currMarker);
+            // 2. create coordinate where marker should be displayed
+            const coords = {
+              latitude: currMarker.latitude,
+              longitude: currMarker.longitude,
+            };
+            // 3. define UI for the marker
+            return (
+              <Marker
+                key={index}
+                coordinate={coords}
+                title={currMarker.name}
+                description={currMarker.desc}
+              >
+                <View
+                  style={{
+                    backgroundColor: "white",
+                    padding: 10,
+                    borderRadius: 50,
+                  }}
                 >
-                  <View style={{ backgroundColor: "white", padding: 10,borderRadius: 50 }}>
-                    <Text style={{ color: 'black',fontWeight: 'bold' }}>${currMarker.price}</Text>
-                  </View>
-
-                </Marker>
-              )
-            }
-          )
-        }
+                  <Text style={{ color: "black", fontWeight: "bold" }}>
+                    ${currMarker.price}
+                  </Text>
+                </View>
+              </Marker>
+            );
+          }
+        )}
       </MapView>
     </View>
   );
