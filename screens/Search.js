@@ -1,4 +1,12 @@
-import { Text, StyleSheet, View, Image, Modal, TouchableOpacity, Pressable } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  View,
+  Image,
+  Modal,
+  TouchableOpacity,
+  Pressable,
+} from "react-native";
 import Styles from "../Styles";
 import * as Location from "expo-location";
 import MapView, { Marker, Callout } from "react-native-maps";
@@ -6,7 +14,8 @@ import React, { useEffect, useState } from "react";
 import { useIsFocused } from "@react-navigation/native";
 import { db } from "../firebaseConfig";
 import { collection, getDocs, query, where } from "firebase/firestore";
-
+import { Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function Search() {
   const isFocused = useIsFocused();
@@ -20,7 +29,6 @@ export default function Search() {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
-
 
   const getCurrentLocation = async () => {
     try {
@@ -61,7 +69,6 @@ export default function Search() {
       console.log(err);
     }
   };
-
 
   // Call getCurrentLocation once when the component is mounted
   useEffect(() => {
@@ -115,13 +122,13 @@ export default function Search() {
               id: carDoc.id,
               ...markerCoords,
               efficiency: carDoc.data().efficiency,
+              horsepower: carDoc.data().horsepower,
               license: carDoc.data().license,
               name: carDoc.data().name,
               price: carDoc.data().price,
               range: carDoc.data().range,
               seating: carDoc.data().seating,
-              images: carDoc.data().images.map((imageObj) => imageObj.url_full)
-
+              images: carDoc.data().images.map((imageObj) => imageObj.url_full),
             };
 
             resultsFromFirestore.push(itemToAdd);
@@ -238,7 +245,6 @@ export default function Search() {
     }
   };
 
-
   //Function to handle marker press and show modal
   const handleMarkerPress = (markerData) => {
     setSelectedMarker(markerData);
@@ -252,7 +258,6 @@ export default function Search() {
   };
 
   return (
-
     <View>
       <MapView
         style={{ height: "100%", width: "100%" }}
@@ -294,56 +299,179 @@ export default function Search() {
 
       <Modal
         animationType="slide"
+        presentationStyle="pageSheet"
         transparent={true}
         visible={modalVisible}
         onRequestClose={closeModal}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            {selectedMarker && (
-              <View>
+        {selectedMarker && (
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  flex: 1,
+                }}
+              >
+                <View style={{ paddingLeft: 15, paddingTop: 20 }}>
+                  <Text
+                    style={{
+                      fontSize: 25,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {selectedMarker.name}
+                  </Text>
+                  <Text>{selectedMarker.license}</Text>
+                </View>
                 <Image
-                  style={{ width: "100%", height: 250 }}
-                  source={{ uri: selectedMarker.images[0]}}
+                  style={{ width: "45%", height: 110 }}
+                  source={{ uri: selectedMarker.images[0] }}
                 ></Image>
-                <Text style={{ fontWeight: "bold", fontSize: 16 }}>
-                  {selectedMarker.name}
-                </Text>
-                <Text>Description: {selectedMarker.desc}</Text>
-                <Text>Price: ${selectedMarker.price}</Text>
-                {/* Add more details as needed */}
-                <Pressable onPress={closeModal} style={styles.closeButton}>
-                  <Text style={{ color: "white" }}>Close</Text>
+              </View>
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  paddingBottom: 10,
+                  paddingLeft: 15,
+                }}
+              >
+                Overview
+              </Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  gap: 10,
+                  flex: 1,
+                }}
+              >
+                <View
+                  style={{
+                    backgroundColor: "#fff",
+                    flex: 1,
+                    borderRadius: 20,
+                    padding: 15,
+                    alignItems: "center",
+                  }}
+                >
+                  <Ionicons
+                    name="speedometer-outline"
+                    size={30}
+                    color="black"
+                  />
+                  <Text>Horsepower</Text>
+                  <Text style={{ fontSize: 20 }}>
+                    {selectedMarker.horsepower}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    backgroundColor: "#fff",
+                    flex: 1,
+                    borderRadius: 20,
+                    padding: 15,
+                    alignItems: "center",
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="car-seat"
+                    size={30}
+                    color="black"
+                  />
+                  <Text>Capacity</Text>
+                  <Text style={{ fontSize: 20 }}>{selectedMarker.seating}</Text>
+                </View>
+                <View
+                  style={{
+                    backgroundColor: "#fff",
+                    flex: 1,
+                    borderRadius: 20,
+                    padding: 15,
+                    alignItems: "center",
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="car-turbocharger"
+                    size={30}
+                    color="black"
+                  />
+                  <Text>Efficiency</Text>
+                  <Text style={{ fontSize: 20 }}>
+                    {selectedMarker.efficiency}
+                  </Text>
+                </View>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  flex: 1,
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    padding: 20,
+                    alignItems: "baseline",
+                  }}
+                >
+                  <Text style={{ fontSize: 35, fontWeight: "bold" }}>
+                    ${selectedMarker.price}
+                  </Text>
+                  <Text style={{ color: "#999", fontSize: 20 }}>/week</Text>
+                </View>
+                <Pressable>
+                  <View
+                    style={{
+                      backgroundColor: "#111",
+                      paddingVertical: 20,
+                      borderRadius: 40,
+                      paddingHorizontal: 50,
+                    }}
+                  >
+                    <View style={{ flexDirection: "row", alignSelf: "center" }}>
+                      <Text
+                        style={{
+                          fontSize: 20,
+                          color: "#fff",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Book Now
+                      </Text>
+                    </View>
+                  </View>
                 </Pressable>
               </View>
-            )}
+            </View>
           </View>
-        </View>
+        )}
       </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  modalContainer: {
+  centeredView: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+    // alignItems: "center",
+    marginTop: 22,
   },
-  modalContent: {
+  modalView: {
     width: "100%",
-    height: "90%",
-    backgroundColor: "#222",
+    height: "50%",
+    backgroundColor: "#F7F7F7",
     padding: 10,
-    //alignItems: "center",
+    gap: 7,
     shadowColor: "#111",
     shadowOpacity: 1,
     shadowRadius: 15,
     elevation: 5,
-    borderRadius: 10,
-   
-    
+    borderRadius: 20,
   },
   closeButton: {
     backgroundColor: "red",
@@ -354,3 +482,24 @@ const styles = StyleSheet.create({
   },
 });
 
+// <View style={styles.modalContainer}>
+//           <View style={styles.modalContent}>
+//             {selectedMarker && (
+//               <View>
+//                 <Image
+//                   style={{ width: "100%", height: 250 }}
+//                   source={{ uri: selectedMarker.images[0] }}
+//                 ></Image>
+//                 <Text style={{ fontWeight: "bold", fontSize: 16 }}>
+//                   {selectedMarker.name}
+//                 </Text>
+//                 <Text>Description: {selectedMarker.desc}</Text>
+//                 <Text>Price: ${selectedMarker.price}</Text>
+//                 {/* Add more details as needed */}
+//                 <Pressable onPress={closeModal} style={styles.closeButton}>
+//                   <Text style={{ color: "white" }}>Close</Text>
+//                 </Pressable>
+//               </View>
+//             )}
+//           </View>
+//         </View>

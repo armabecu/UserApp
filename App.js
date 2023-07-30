@@ -41,30 +41,20 @@ export default function App() {
           tabBarIcon: ({ focused, color, size }) => {
             let iconName;
 
-            if (route.name === "Listings") {
-              iconName = focused = "ios-create";
-            } else if (route.name === "Bookings") {
+            if (route.name === "Search") {
+              iconName = focused = "search";
+            } else if (route.name === "Registrations") {
               iconName = focused ? "ios-list" : "ios-list-outline";
             }
             return <Ionicons name={iconName} size={size} color={color} />;
           },
-          tabBarActiveTintColor: "black",
+          tabBarActiveTintColor: "white",
           tabBarInactiveTintColor: "gray",
           headerShown: false,
-          tabBarStyle: {
-            position: "absolute",
-            bottom: 20,
-            left: 20,
-            right: 20,
-            elevation: 0,
-            backgroundColor: "#fff",
-            borderRadius: 15,
-            height: 70,
-          },
         })}
       >
-        <Tab.Screen name="Search" component={Search} style={{ flex: 1 }} />
-        <Tab.Screen name="Registrations" component={Registrations} style={{ flex: 1 }}/>
+        <Tab.Screen name="Search" component={Search} />
+        <Tab.Screen name="Registrations" component={Registrations} />
       </Tab.Navigator>
     </NavigationContainer>
   );
