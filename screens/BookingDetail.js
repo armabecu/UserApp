@@ -1,23 +1,28 @@
 import {
-    Text,
-    StyleSheet,
-    View,
-    Button,
-    SafeAreaView,
-    Pressable,
-    FlatList,
-    Image,
-  } from "react-native";
-  import Styles from "../Styles";
-  import { Ionicons } from "@expo/vector-icons";
-  import { MaterialCommunityIcons } from "@expo/vector-icons";
-  import { Entypo } from "@expo/vector-icons";
-  
-  export default function BookingDetail({ route, navigation }) {
-    const { booking } = route.params;
-  
-    return (
-      <SafeAreaView>
+  Text,
+  StyleSheet,
+  View,
+  Button,
+  SafeAreaView,
+  Pressable,
+  FlatList,
+  Image,
+  ScrollView,
+} from "react-native";
+import Styles from "../Styles";
+import { Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
+import { useState } from "react";
+
+export default function BookingDetail({ route, navigation }) {
+  const { booking } = route.params;
+
+  const [confirmationNumber, setconfirmationNumber] = useState("Not Available");
+
+  return (
+    <SafeAreaView>
+      <ScrollView>
         <Pressable
           onPress={() => {
             navigation.goBack();
@@ -143,7 +148,88 @@ import {
               </View>
             </Pressable>
           </View>
+
+
+
+          <View
+            style={{
+              padding: 15,
+              gap: 10
+            }}
+          >
+
+
+            <View flex="1">
+              <View
+                style={{
+                  backgroundColor: "#fff",
+                  padding: 15,
+                  borderRadius: 20,
+                }}
+              >
+                <View flexDirection="row">
+                  <Entypo name="check" size={24} color="#444" />
+                  <Text style={{ fontSize: 20, color: "black" }}>Owner Info: </Text>
+                  <Text style={{ fontSize: 20, color: "black" }}>{booking.owner.name}</Text>
+                </View>
+              </View>
+            </View>
+
+
+
+
+            <View flex="1">
+              <View
+                style={{
+                  backgroundColor: "#fff",
+                  padding: 15,
+                  borderRadius: 20,
+                }}
+              >
+                <View flexDirection="row">
+                  <Entypo name="check" size={24} color="#444" />
+                  <Text style={{ fontSize: 20, color: "black" }}>Date: {booking.bookingDate}</Text>
+                </View>
+              </View>
+            </View>
+
+            <View flex="1">
+              <View
+                style={{
+                  backgroundColor: "#fff",
+                  padding: 15,
+                  borderRadius: 20,
+                }}
+              >
+                <View flexDirection="row">
+                  <Entypo name="check" size={24} color="#444" />
+                  <Text style={{ fontSize: 20, color: "black" }}>Status: {booking.status}</Text>
+                </View>
+              </View>
+            </View>
+
+            <View flex="1">
+              <View
+                style={{
+                  backgroundColor: "#fff",
+                  padding: 15,
+                  borderRadius: 20,
+                }}
+              >
+                <View flexDirection="row">
+                  <Entypo name="check" size={24} color="#444" />
+                  <Text style={{ fontSize: 20, color: "black" }}>Confirmation #: {confirmationNumber}</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+
+
+
+
+
         </View>
-      </SafeAreaView>
-    );
-  }
+      </ScrollView>
+    </SafeAreaView>
+  );
+}

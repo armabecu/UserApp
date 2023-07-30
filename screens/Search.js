@@ -272,6 +272,13 @@ export default function Search() {
 
     let futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + Math.floor(Math.random() * 365) + 1);
+    
+    const year = futureDate.getFullYear();
+    const month = futureDate.getMonth() + 1; // Months are 0-based, so add 1
+    const date = futureDate.getDate();
+    
+    const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${date.toString().padStart(2, '0')}`;
+    
 
     if (authUser != null) {
       const bookingToAdd = {
@@ -286,7 +293,7 @@ export default function Search() {
         images: selectedMarker.images,
         horsepower: selectedMarker.horsepower,
         owner:selectedMarker.owner,
-        bookingDate:futureDate,
+        bookingDate:formattedDate,
         confirmation:""
         
       };
