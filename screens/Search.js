@@ -1,11 +1,12 @@
-import { Text, StyleSheet, View } from "react-native";
+import { Text, StyleSheet, View, Image, Modal, TouchableOpacity, Pressable } from "react-native";
 import Styles from "../Styles";
 import * as Location from "expo-location";
-import MapView, { Marker } from "react-native-maps";
-import { useEffect, useState } from "react";
+import MapView, { Marker, Callout } from "react-native-maps";
+import React, { useEffect, useState } from "react";
 import { useIsFocused } from "@react-navigation/native";
 import { db } from "../firebaseConfig";
 import { collection, getDocs, query, where } from "firebase/firestore";
+
 
 export default function Search() {
   const isFocused = useIsFocused();
@@ -16,6 +17,10 @@ export default function Search() {
   const [city, setCity] = useState("");
 
   const [marker, setMarkers] = useState([]);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedMarker, setSelectedMarker] = useState(null);
+
 
   const getCurrentLocation = async () => {
     try {
@@ -56,6 +61,7 @@ export default function Search() {
       console.log(err);
     }
   };
+
 
   // Call getCurrentLocation once when the component is mounted
   useEffect(() => {
@@ -102,6 +108,9 @@ export default function Search() {
               carDoc.data().location
             );
 
+            // Extract URLs from the "Images" field
+            //const imageUrls = carDoc.data().images.map((imageObj) => imageObj.url_full);
+
             const itemToAdd = {
               id: carDoc.id,
               ...markerCoords,
@@ -111,6 +120,8 @@ export default function Search() {
               price: carDoc.data().price,
               range: carDoc.data().range,
               seating: carDoc.data().seating,
+              images: carDoc.data().images.map((imageObj) => imageObj.url_full)
+
             };
 
             resultsFromFirestore.push(itemToAdd);
@@ -227,55 +238,119 @@ export default function Search() {
     }
   };
 
+
+  //Function to handle marker press and show modal
+  const handleMarkerPress = (markerData) => {
+    setSelectedMarker(markerData);
+    setModalVisible(true);
+  };
+
+  // Function to hide the modal
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedMarker(null);
+  };
+
   return (
+
     <View>
       <MapView
-        ref={(ref) => {
-          mapViewRef = ref;
-        }}
         style={{ height: "100%", width: "100%" }}
         initialRegion={{
-          latitude: latFromUI,
-          longitude: lngFromUI,
+          latitude: parseFloat(latFromUI),
+          longitude: parseFloat(lngFromUI),
           latitudeDelta: 0.1,
           longitudeDelta: 0.1,
         }}
       >
-        {marker.map(
-          // this function will run once per item in the MARKERS_ARRAY
-          (currMarker, index) => {
-            // 1. debug information
-            console.log(`Marker Index: ${index}`);
-            console.log(currMarker);
-            // 2. create coordinate where marker should be displayed
-            const coords = {
-              latitude: currMarker.latitude,
-              longitude: currMarker.longitude,
-            };
-            // 3. define UI for the marker
-            return (
-              <Marker
-                key={index}
-                coordinate={coords}
-                title={currMarker.name}
-                description={currMarker.desc}
+        {marker.map((currMarker, index) => {
+          const coords = {
+            latitude: currMarker.latitude,
+            longitude: currMarker.longitude,
+          };
+          return (
+            <Marker
+              key={index}
+              coordinate={coords}
+              title={currMarker.name}
+              description={currMarker.desc}
+              onPress={() => handleMarkerPress(currMarker)}
+            >
+              <View
+                style={{
+                  backgroundColor: "white",
+                  padding: 10,
+                  borderRadius: 50,
+                }}
               >
-                <View
-                  style={{
-                    backgroundColor: "white",
-                    padding: 10,
-                    borderRadius: 50,
-                  }}
-                >
-                  <Text style={{ color: "black", fontWeight: "bold" }}>
-                    ${currMarker.price}
-                  </Text>
-                </View>
-              </Marker>
-            );
-          }
-        )}
+                <Text style={{ color: "black", fontWeight: "bold" }}>
+                  ${currMarker.price}
+                </Text>
+              </View>
+            </Marker>
+          );
+        })}
       </MapView>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={closeModal}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            {selectedMarker && (
+              <View>
+                <Image
+                  style={{ width: "100%", height: 250 }}
+                  source={{ uri: selectedMarker.images[0]}}
+                ></Image>
+                <Text style={{ fontWeight: "bold", fontSize: 16 }}>
+                  {selectedMarker.name}
+                </Text>
+                <Text>Description: {selectedMarker.desc}</Text>
+                <Text>Price: ${selectedMarker.price}</Text>
+                {/* Add more details as needed */}
+                <Pressable onPress={closeModal} style={styles.closeButton}>
+                  <Text style={{ color: "white" }}>Close</Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "100%",
+    height: "90%",
+    backgroundColor: "#222",
+    padding: 10,
+    //alignItems: "center",
+    shadowColor: "#111",
+    shadowOpacity: 1,
+    shadowRadius: 15,
+    elevation: 5,
+    borderRadius: 10,
+   
+    
+  },
+  closeButton: {
+    backgroundColor: "red",
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    alignItems: "center",
+  },
+});
+

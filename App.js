@@ -63,8 +63,8 @@ export default function App() {
           },
         })}
       >
-        <Tab.Screen name="Search" component={Search} />
-        <Tab.Screen name="Registrations" component={Registrations} />
+        <Tab.Screen name="Search" component={Search} style={{ flex: 1 }} />
+        <Tab.Screen name="Registrations" component={Registrations} style={{ flex: 1 }}/>
       </Tab.Navigator>
     </NavigationContainer>
   );
