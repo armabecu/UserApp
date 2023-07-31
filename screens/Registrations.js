@@ -13,8 +13,10 @@ import { useEffect } from "react";
 import { db } from "../firebaseConfig";
 import { collection, getDocs, doc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { auth } from "../firebaseConfig";
 import BookingDetail from "./BookingDetail";
 import { AntDesign } from "@expo/vector-icons";
+
 
 export default function Registrations({ navigation }) {
 
@@ -66,11 +68,18 @@ export default function Registrations({ navigation }) {
               </View>
             </Pressable>
           )}
+
+
         />
+
+        <Button title="Sign Out" onPress={signOut} />
+
       </View>
-         <View style={Styles.screen}>
-       <Button title="Sign Out" onPress={signOut} />
-     </View>
+
+
+
+
+
     </SafeAreaView>
   );
 }

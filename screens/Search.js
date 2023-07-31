@@ -297,6 +297,11 @@ export default function Search() {
         confirmation:""
         
       };
+
+      const renter = {
+        id:authUser.uid,
+        email:authUser.email
+      }
       try {
         await setDoc(
           doc(collection(db, "renters", authUser.uid, "bookings"), selectedMarker.id),
@@ -305,7 +310,7 @@ export default function Search() {
 
         await updateDoc(
           doc(collection(db, 'owners', selectedMarker.owner.id,'listings'),selectedMarker.id ),
-          { status: "Needs Approval", bookingDate:futureDate }
+          { status: "Needs Approval", bookingDate:futureDate, renterInfo:renter }
         );
 
         alert("Added to Bookings list, you need to wait for owner confirmation");

@@ -13,12 +13,20 @@ import Styles from "../Styles";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function BookingDetail({ route, navigation }) {
   const { booking } = route.params;
 
-  const [confirmationNumber, setconfirmationNumber] = useState("Not Available");
+  const [showconfirmationNumber, setshowconfirmationNumber] = useState(false);
+
+  useEffect(() => {
+
+    if(booking.status == "Approved"){
+      setshowconfirmationNumber(true)
+    }
+  }, []);
+
 
   return (
     <SafeAreaView>
@@ -112,44 +120,6 @@ export default function BookingDetail({ route, navigation }) {
             <Text style={{ fontSize: 30, color: "#fff" }}>Price</Text>
             <Text style={{ fontSize: 30, color: "#fff" }}>${booking.price}</Text>
           </View>
-          <View
-            style={{
-              flexDirection: "row",
-              padding: 15,
-              gap: 10,
-            }}
-          >
-            <Pressable flex="1">
-              <View
-                style={{
-                  backgroundColor: "#b5b3b3",
-                  padding: 25,
-                  borderRadius: 20,
-                }}
-              >
-                <View flexDirection="row">
-                  <Entypo name="cross" size={24} color="#444" />
-                  <Text style={{ fontSize: 20, color: "#444" }}>Decline</Text>
-                </View>
-              </View>
-            </Pressable>
-            <Pressable flex="1">
-              <View
-                style={{
-                  backgroundColor: "#fff",
-                  padding: 25,
-                  borderRadius: 20,
-                }}
-              >
-                <View flexDirection="row">
-                  <Entypo name="check" size={24} color="#444" />
-                  <Text style={{ fontSize: 20, color: "black" }}>Approve</Text>
-                </View>
-              </View>
-            </Pressable>
-          </View>
-
-
 
           <View
             style={{
@@ -208,7 +178,7 @@ export default function BookingDetail({ route, navigation }) {
               </View>
             </View>
 
-            <View flex="1">
+            {showconfirmationNumber ? <View flex="1">
               <View
                 style={{
                   backgroundColor: "#fff",
@@ -216,12 +186,13 @@ export default function BookingDetail({ route, navigation }) {
                   borderRadius: 20,
                 }}
               >
-                <View flexDirection="row">
+                 <View flexDirection="row">
                   <Entypo name="check" size={24} color="#444" />
-                  <Text style={{ fontSize: 20, color: "black" }}>Confirmation #: {confirmationNumber}</Text>
+                  <Text style={{ fontSize: 20, color: "black" }}>Confirmation #: {booking.confirmation}</Text>
                 </View>
+                
               </View>
-            </View>
+            </View>:null}
           </View>
 
 
