@@ -16,11 +16,13 @@ import { getAuth } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 import BookingDetail from "./BookingDetail";
 import { AntDesign } from "@expo/vector-icons";
+import { useIsFocused } from "@react-navigation/native";
 
 
 export default function Registrations({ navigation }) {
 
   const [bookings, setBookings] = useState([]);
+  const isFocused = useIsFocused();
 
   async function loadBookings() {
     const authUser = getAuth().currentUser;
@@ -37,6 +39,13 @@ export default function Registrations({ navigation }) {
   useEffect(() => {
     loadBookings();
   }, []);
+
+  useEffect(() => {
+    if(isFocused){
+      loadBookings();
+    }
+
+  }, [isFocused]);
 
   async function signOut() {
     auth.signOut().then(() => console.log("User signed out!"));

@@ -310,6 +310,7 @@ export default function Search() {
         );
 
         alert("Added to Bookings list, you need to wait for owner confirmation");
+        setModalVisible(false)
       } catch (error) {
         alert("Error!", error.message);
         console.log(error);
