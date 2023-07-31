@@ -20,14 +20,10 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function Search() {
   const isFocused = useIsFocused();
-
-  const [latFromUI, setLatFromUI] = useState("43.676410");
-  const [lngFromUI, setLngFromUI] = useState("-79.410150");
-
+  const [latFromUI, setLatFromUI] = useState("0");
+  const [lngFromUI, setLngFromUI] = useState("0");
   const [city, setCity] = useState("");
-
   const [marker, setMarkers] = useState([]);
-
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
 
@@ -328,7 +324,7 @@ export default function Search() {
     <View>
       <MapView
         style={{ height: "100%", width: "100%" }}
-        initialRegion={{
+        region={{
           latitude: parseFloat(latFromUI),
           longitude: parseFloat(lngFromUI),
           latitudeDelta: 0.1,
