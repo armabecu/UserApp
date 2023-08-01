@@ -341,7 +341,7 @@ export default function Search() {
             <Marker
               key={index}
               coordinate={coords}
-              title={currMarker.name}
+              //title={currMarker.name}
               description={currMarker.desc}
               onPress={() => handleMarkerPress(currMarker)}
             >

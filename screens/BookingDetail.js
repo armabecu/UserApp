@@ -14,18 +14,41 @@ import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
+import JaneDoeImage from "../assets/profile.png";
+import JohnDoeImage from "../assets/profile02.png";
 
 export default function BookingDetail({ route, navigation }) {
   const { booking } = route.params;
 
   const [showconfirmationNumber, setshowconfirmationNumber] = useState(false);
 
+  const [icon, seticon] = useState("hour-glass");
+
   useEffect(() => {
 
-    if(booking.status == "Approved"){
+    if (booking.status == "Declined") {
+      seticon("circle-with-cross")
+    } else if (booking.status == "Approved") {
+      seticon("check")
+    }
+
+    if (booking.status == "Approved") {
       setshowconfirmationNumber(true)
     }
+
+
+
   }, []);
+
+  function getImage(userName) {
+    if (userName === "Jane Doe") {
+      return JaneDoeImage;
+    } else if (userName === "John Doe") {
+      return JohnDoeImage;
+    } else {
+      return;
+    }
+  }
 
 
   return (
@@ -137,10 +160,18 @@ export default function BookingDetail({ route, navigation }) {
                   borderRadius: 20,
                 }}
               >
-                <View flexDirection="row">
-                  <Entypo name="check" size={24} color="#444" />
-                  <Text style={{ fontSize: 20, color: "black" }}>Owner Info: </Text>
-                  <Text style={{ fontSize: 20, color: "black" }}>{booking.owner.name}</Text>
+                <View flexDirection="row" gap="40">
+                  <View flexDirection="row">
+                  <Entypo name="info-with-circle" size={24} color="#444" />
+                  <Text style={{ fontSize: 20, color: "black" }}> Owner: </Text>
+                  </View>
+                  <View >
+                    <Text style={{ fontSize: 20, color: "black" }}>{booking.owner.name}</Text>
+                    <Image
+                      style={{ width: 80, height: 80, borderRadius: 50 }}
+                      source={getImage(booking.owner.name)}
+                    />
+                  </View>
                 </View>
               </View>
             </View>
@@ -157,8 +188,9 @@ export default function BookingDetail({ route, navigation }) {
                 }}
               >
                 <View flexDirection="row">
-                  <Entypo name="check" size={24} color="#444" />
-                  <Text style={{ fontSize: 20, color: "black" }}>Date: {booking.bookingDate}</Text>
+                  <Ionicons name="today" size={24} color="black" />
+
+                  <Text style={{ fontSize: 20, color: "black" }}> Date: {booking.bookingDate}</Text>
                 </View>
               </View>
             </View>
@@ -172,7 +204,22 @@ export default function BookingDetail({ route, navigation }) {
                 }}
               >
                 <View flexDirection="row">
-                  <Entypo name="check" size={24} color="#444" />
+                  <Entypo name="location-pin" size={24} color="black" />
+                  <Text style={{ fontSize: 20, color: "black" }}>{booking.location}</Text>
+                </View>
+              </View>
+            </View>
+
+            <View flex="1">
+              <View
+                style={{
+                  backgroundColor: "#fff",
+                  padding: 15,
+                  borderRadius: 20,
+                }}
+              >
+                <View flexDirection="row">
+                  <Entypo name={icon} size={24} color="#444" />
                   <Text style={{ fontSize: 20, color: "black" }}>Status: {booking.status}</Text>
                 </View>
               </View>
@@ -186,13 +233,13 @@ export default function BookingDetail({ route, navigation }) {
                   borderRadius: 20,
                 }}
               >
-                 <View flexDirection="row">
-                  <Entypo name="check" size={24} color="#444" />
+                <View flexDirection="row">
+                  <Entypo name="key" size={24} color="black" />
                   <Text style={{ fontSize: 20, color: "black" }}>Confirmation #: {booking.confirmation}</Text>
                 </View>
-                
+
               </View>
-            </View>:null}
+            </View> : null}
           </View>
 
 
