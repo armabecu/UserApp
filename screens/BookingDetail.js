@@ -12,32 +12,64 @@ import {
 import Styles from "../Styles";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 import JaneDoeImage from "../assets/profile.png";
 import JohnDoeImage from "../assets/profile02.png";
+import { doc, onSnapshot, collection, query, where } from "firebase/firestore";
+import { db } from "../firebaseConfig";
+import { auth } from "../firebaseConfig";
 
 export default function BookingDetail({ route, navigation }) {
-  const { booking } = route.params;
+  const { booking: initialBooking } = route.params;
+  const [booking, setBooking] = useState(initialBooking);
 
-  const [showconfirmationNumber, setshowconfirmationNumber] = useState(false);
+  const [showconfirmationNumber, setShowConfirmationNumber] = useState(false);
 
-  const [icon, seticon] = useState("hour-glass");
+  const [icon, setIcon] = useState("hour-glass");
+
+  // useEffect(() => {
+  //   if (booking.status == "Declined") {
+  //     seticon("circle-with-cross");
+  //   } else if (booking.status == "Approved") {
+  //     seticon("check");
+  //   }
+
+  //   if (booking.status == "Approved") {
+  //     setshowconfirmationNumber(true);
+  //   }
+
+  //   console.log(booking.uid);
+  // }, [booking.status]);
 
   useEffect(() => {
+    const bookingsCollection = collection(
+      db,
+      "renters",
+      auth.currentUser.uid,
+      "bookings"
+    );
+    const q = query(bookingsCollection, where("name", "==", booking.name));
 
-    if (booking.status == "Declined") {
-      seticon("circle-with-cross")
-    } else if (booking.status == "Approved") {
-      seticon("check")
-    }
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const docs = snapshot.docs;
 
-    if (booking.status == "Approved") {
-      setshowconfirmationNumber(true)
-    }
+      if (docs.length > 0) {
+        const bookingData = docs[0].data();
+        setBooking(bookingData);
+        if (bookingData.status === "Declined") {
+          setIcon("circle-with-cross");
+        } else if (bookingData.status === "Approved") {
+          setIcon("check");
+          setShowConfirmationNumber(true);
+        }
+      } else {
+        console.log("No such document!");
+      }
+    });
 
-
-
+    return unsubscribe; // Detach the listener when the component unmounts
   }, []);
 
   function getImage(userName) {
@@ -49,7 +81,6 @@ export default function BookingDetail({ route, navigation }) {
       return;
     }
   }
-
 
   return (
     <SafeAreaView>
@@ -141,18 +172,18 @@ export default function BookingDetail({ route, navigation }) {
             }}
           >
             <Text style={{ fontSize: 30, color: "#fff" }}>Price</Text>
-            <Text style={{ fontSize: 30, color: "#fff" }}>${booking.price}</Text>
+            <Text style={{ fontSize: 30, color: "#fff" }}>
+              ${booking.price}
+            </Text>
           </View>
 
           <View
             style={{
               padding: 15,
-              gap: 10
+              gap: 20,
             }}
           >
-
-
-            <View flex="1">
+            {/* <View flex="1">
               <View
                 style={{
                   backgroundColor: "#fff",
@@ -160,24 +191,65 @@ export default function BookingDetail({ route, navigation }) {
                   borderRadius: 20,
                 }}
               >
-                <View flexDirection="row" gap="40">
+                <View flexDirection="row">
                   <View flexDirection="row">
-                  <Entypo name="info-with-circle" size={24} color="#444" />
-                  <Text style={{ fontSize: 20, color: "black" }}> Owner: </Text>
-                  </View>
-                  <View >
-                    <Text style={{ fontSize: 20, color: "black" }}>{booking.owner.name}</Text>
-                    <Image
-                      style={{ width: 80, height: 80, borderRadius: 50 }}
-                      source={getImage(booking.owner.name)}
-                    />
+                    <Entypo name="info-with-circle" size={24} color="#444" />
+                    <Text style={{ fontSize: 20, color: "black" }}>
+                      {" "}
+                      Owner:{" "}
+                    </Text>
                   </View>
                 </View>
+                <View flexDirection="row" justifyContent="space-evenly">
+                  <Text style={{ fontSize: 30, color: "black", padding: 20 }}>
+                    {booking.owner.name}
+                  </Text>
+                  <Image
+                    style={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: 50,
+                    }}
+                    source={getImage(booking.owner.name)}
+                  />
+                </View>
+              </View>
+            </View> */}
+            <View flex="1">
+              <View
+                style={{
+                  backgroundColor: "#fff",
+                  padding: 15,
+                  borderRadius: 20,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Image
+                    style={{
+                      width: 60,
+                      height: 60,
+                      borderRadius: 50,
+                    }}
+                    source={getImage(booking.owner.name)}
+                  />
+
+                  <View>
+                    <Text style={{ padding: 10, fontSize: 25 }}>
+                      {booking.owner.name}
+                      {"\n"}
+                      <Text style={{ fontSize: 14, color: "#666666" }}>
+                        Owner
+                      </Text>
+                    </Text>
+                  </View>
+                </View>
+                <Ionicons name="call" size={24} color="black" />
+                <MaterialIcons name="message" size={24} color="black" />
               </View>
             </View>
-
-
-
 
             <View flex="1">
               <View
@@ -190,7 +262,10 @@ export default function BookingDetail({ route, navigation }) {
                 <View flexDirection="row">
                   <Ionicons name="today" size={24} color="black" />
 
-                  <Text style={{ fontSize: 20, color: "black" }}> Date: {booking.bookingDate}</Text>
+                  <Text style={{ fontSize: 20, color: "black" }}>
+                    {" "}
+                    Date: {booking.bookingDate}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -205,7 +280,9 @@ export default function BookingDetail({ route, navigation }) {
               >
                 <View flexDirection="row">
                   <Entypo name="location-pin" size={24} color="black" />
-                  <Text style={{ fontSize: 20, color: "black" }}>{booking.location}</Text>
+                  <Text style={{ fontSize: 20, color: "black" }}>
+                    {booking.location}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -220,32 +297,32 @@ export default function BookingDetail({ route, navigation }) {
               >
                 <View flexDirection="row">
                   <Entypo name={icon} size={24} color="#444" />
-                  <Text style={{ fontSize: 20, color: "black" }}>Status: {booking.status}</Text>
+                  <Text style={{ fontSize: 20, color: "black" }}>
+                    Status: {booking.status}
+                  </Text>
                 </View>
               </View>
             </View>
 
-            {showconfirmationNumber ? <View flex="1">
-              <View
-                style={{
-                  backgroundColor: "#fff",
-                  padding: 15,
-                  borderRadius: 20,
-                }}
-              >
-                <View flexDirection="row">
-                  <Entypo name="key" size={24} color="black" />
-                  <Text style={{ fontSize: 20, color: "black" }}>Confirmation #: {booking.confirmation}</Text>
+            {showconfirmationNumber ? (
+              <View flex="1">
+                <View
+                  style={{
+                    backgroundColor: "#fff",
+                    padding: 15,
+                    borderRadius: 20,
+                  }}
+                >
+                  <View flexDirection="row">
+                    <Entypo name="key" size={24} color="black" />
+                    <Text style={{ fontSize: 20, color: "black" }}>
+                      Confirmation #: {booking.confirmation}
+                    </Text>
+                  </View>
                 </View>
-
               </View>
-            </View> : null}
+            ) : null}
           </View>
-
-
-
-
-
         </View>
       </ScrollView>
     </SafeAreaView>

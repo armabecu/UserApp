@@ -18,9 +18,7 @@ import BookingDetail from "./BookingDetail";
 import { AntDesign } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/native";
 
-
 export default function Registrations({ navigation }) {
-
   const [bookings, setBookings] = useState([]);
   const isFocused = useIsFocused();
 
@@ -41,10 +39,9 @@ export default function Registrations({ navigation }) {
   }, []);
 
   useEffect(() => {
-    if(isFocused){
+    if (isFocused) {
       loadBookings();
     }
-
   }, [isFocused]);
 
   async function signOut() {
@@ -77,18 +74,10 @@ export default function Registrations({ navigation }) {
               </View>
             </Pressable>
           )}
-
-
         />
 
         <Button title="Sign Out" onPress={signOut} />
-
       </View>
-
-
-
-
-
     </SafeAreaView>
   );
 }
