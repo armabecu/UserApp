@@ -14,7 +14,16 @@ import React, { useEffect, useState } from "react";
 import { useIsFocused } from "@react-navigation/native";
 import { db } from "../firebaseConfig";
 import { getAuth } from "firebase/auth";
-import { collection, getDocs, query, where, addDoc, setDoc, doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  addDoc,
+  setDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -113,9 +122,9 @@ export default function Search() {
             );
 
             const ownerInfo = {
-              id:ownerID,
-              name: ownerDoc.data().name
-            }
+              id: ownerID,
+              name: ownerDoc.data().name,
+            };
 
             const itemToAdd = {
               id: carDoc.id,
@@ -127,12 +136,12 @@ export default function Search() {
               price: carDoc.data().price,
               range: carDoc.data().range,
               seating: carDoc.data().seating,
-              location:carDoc.data().location,
+              location: carDoc.data().location,
               images: carDoc.data().images.map((imageObj) => imageObj.url_full),
-              owner:ownerInfo,
-              status:carDoc.data().status,
-              bookingDate:carDoc.data().bookingDate,
-              confirmation:carDoc.data().confirmation
+              owner: ownerInfo,
+              status: carDoc.data().status,
+              bookingDate: carDoc.data().bookingDate,
+              confirmation: carDoc.data().confirmation,
             };
 
             resultsFromFirestore.push(itemToAdd);
@@ -149,40 +158,6 @@ export default function Search() {
       console.log(err);
     }
   };
-
-  // const getAllCars = async (newCity) => {
-  //   try {
-  //     const querySnapshot = await getDocs(collection(db, "cars"));
-
-  //     const resultsFromFirestore = []
-
-  //     for (let doc of querySnapshot.docs) {
-  //       let carCity = await doForwardGeocode(doc.data().location);
-
-  //       if (carCity == newCity) {
-  //         console.log(`Current City is ${newCity}, Car city is ${carCity}`)
-
-  //         let markerCoords = await doForwardGeocodeForMarker(doc.data().location)
-
-  //         const itemToAdd = {
-  //           id: doc.id,
-  //           ...markerCoords
-  //         }
-
-  //         resultsFromFirestore.push(itemToAdd)
-
-  //       } else {
-  //         console.log(` WRONG Current City is ${newCity}, Car city is ${carCity}`)
-
-  //       }
-  //     }
-
-  //     setMarkers(resultsFromFirestore)
-
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // };
 
   const doForwardGeocode = async (address) => {
     try {
@@ -261,20 +236,21 @@ export default function Search() {
     setSelectedMarker(null);
   };
 
-
-  const bookNow = async() =>{
-
+  const bookNow = async () => {
     const authUser = getAuth().currentUser;
 
     let futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + Math.floor(Math.random() * 365) + 1);
-    
+    futureDate.setDate(
+      futureDate.getDate() + Math.floor(Math.random() * 365) + 1
+    );
+
     const year = futureDate.getFullYear();
     const month = futureDate.getMonth() + 1; // Months are 0-based, so add 1
     const date = futureDate.getDate();
-    
-    const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${date.toString().padStart(2, '0')}`;
-    
+
+    const formattedDate = `${year}-${month.toString().padStart(2, "0")}-${date
+      .toString()
+      .padStart(2, "0")}`;
 
     if (authUser != null) {
       const bookingToAdd = {
@@ -288,29 +264,40 @@ export default function Search() {
         status: "Needs Approval",
         images: selectedMarker.images,
         horsepower: selectedMarker.horsepower,
-        owner:selectedMarker.owner,
-        bookingDate:formattedDate,
-        confirmation:""
-        
+        owner: selectedMarker.owner,
+        bookingDate: formattedDate,
+        confirmation: "",
       };
 
       const renter = {
-        id:authUser.uid,
-        email:authUser.email
-      }
+        id: authUser.uid,
+        email: authUser.email,
+      };
       try {
         await setDoc(
-          doc(collection(db, "renters", authUser.uid, "bookings"), selectedMarker.id),
+          doc(
+            collection(db, "renters", authUser.uid, "bookings"),
+            selectedMarker.id
+          ),
           bookingToAdd
         );
 
         await updateDoc(
-          doc(collection(db, 'owners', selectedMarker.owner.id,'listings'),selectedMarker.id ),
-          { status: "Needs Approval", bookingDate:futureDate, renterInfo:renter }
+          doc(
+            collection(db, "owners", selectedMarker.owner.id, "listings"),
+            selectedMarker.id
+          ),
+          {
+            status: "Needs Approval",
+            bookingDate: futureDate,
+            renterInfo: renter,
+          }
         );
 
-        alert("Added to Bookings list, you need to wait for owner confirmation");
-        setModalVisible(false)
+        alert(
+          "Added to Bookings list, you need to wait for owner confirmation"
+        );
+        setModalVisible(false);
       } catch (error) {
         alert("Error!", error.message);
         console.log(error);
@@ -318,8 +305,7 @@ export default function Search() {
     } else {
       // handle case when user is not logged in
     }
-
-  }
+  };
 
   return (
     <View>
