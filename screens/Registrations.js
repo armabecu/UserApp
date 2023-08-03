@@ -44,9 +44,6 @@ export default function Registrations({ navigation }) {
     }
   }, [isFocused]);
 
-  async function signOut() {
-    auth.signOut().then(() => console.log("User signed out!"));
-  }
 
   return (
     <SafeAreaView>
@@ -75,8 +72,6 @@ export default function Registrations({ navigation }) {
             </Pressable>
           )}
         />
-
-        <Button title="Sign Out" onPress={signOut} />
       </View>
     </SafeAreaView>
   );

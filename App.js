@@ -13,7 +13,13 @@ import { useEffect } from "react";
 import Registrations from "./screens/Registrations";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import BookingDetail from "./screens/BookingDetail";
+import Profile from "./screens/Profile";
+import { LogBox } from 'react-native';
+LogBox.ignoreAllLogs();
 const Tab = createBottomTabNavigator();
+
+
+
 
 export default function App() {
   const [initializing, setInitializing] = useState(true);
@@ -66,6 +72,8 @@ export default function App() {
               iconName = focused = "search";
             } else if (route.name === "Registrations") {
               iconName = focused ? "ios-list" : "ios-list-outline";
+            }else if (route.name === "Profile") {
+              iconName = focused ? "person-circle" : "person-circle";
             }
             return <Ionicons name={iconName} size={size} color={color} />;
           },
@@ -76,6 +84,7 @@ export default function App() {
       >
         <Tab.Screen name="Search" component={Search} />
         <Tab.Screen name="Registrations" component={BookingsStackScreen} />
+        <Tab.Screen name="Profile" component={Profile} />
       </Tab.Navigator>
     </NavigationContainer>
   );

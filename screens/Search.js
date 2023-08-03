@@ -11,7 +11,6 @@ import Styles from "../Styles";
 import * as Location from "expo-location";
 import MapView, { Marker, Callout } from "react-native-maps";
 import React, { useEffect, useState } from "react";
-import { useIsFocused } from "@react-navigation/native";
 import { db } from "../firebaseConfig";
 import { getAuth } from "firebase/auth";
 import {
@@ -28,7 +27,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function Search() {
-  const isFocused = useIsFocused();
   const [latFromUI, setLatFromUI] = useState("0");
   const [lngFromUI, setLngFromUI] = useState("0");
   const [city, setCity] = useState("");
@@ -81,16 +79,16 @@ export default function Search() {
     getCurrentLocation();
   }, []);
 
-  useEffect(() => {
-    // Call getCurrentLocation when the screen gains focus
-    if (isFocused) {
-      getCurrentLocation();
-    }
-  }, [isFocused]);
+  // useEffect(() => {
+  //   // Call getCurrentLocation when the screen gains focus
+  //   if (isFocused) {
+  //     getCurrentLocation();
+  //   }
+  // }, [isFocused]);
 
-  useEffect(() => {
-    console.log(marker);
-  }, [marker]);
+  // useEffect(() => {
+  //   console.log(marker);
+  // }, [marker]);
 
   const setAndFetchCars = async (newCity) => {
     setCity(newCity);
@@ -308,7 +306,7 @@ export default function Search() {
   };
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <MapView
         style={{ height: "100%", width: "100%" }}
         region={{
@@ -345,7 +343,18 @@ export default function Search() {
             </Marker>
           );
         })}
+
       </MapView>
+
+      <TouchableOpacity style={{
+        position: 'absolute',
+        top: 80,
+        right: 10,
+        padding: 10,
+        borderRadius: 5,
+      }}onPress={getCurrentLocation}>
+        <Ionicons name="refresh-circle" size={50} color="black" />
+      </TouchableOpacity>
 
       <Modal
         animationType="slide"
@@ -529,5 +538,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginTop: 10,
     alignItems: "center",
+  },
+  buttonContainer: {
+    position: 'absolute', 
+    bottom: 10, 
+    left: 10, 
   },
 });
