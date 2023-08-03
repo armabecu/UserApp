@@ -343,17 +343,30 @@ export default function Search() {
             </Marker>
           );
         })}
-
       </MapView>
 
-      <TouchableOpacity style={{
-        position: 'absolute',
-        top: 80,
-        right: 10,
-        padding: 10,
-        borderRadius: 5,
-      }}onPress={getCurrentLocation}>
-        <Ionicons name="refresh-circle" size={50} color="black" />
+      <TouchableOpacity
+        style={{
+          position: "absolute",
+          top: 700,
+          right: 0,
+          padding: 10,
+          borderRadius: 5,
+        }}
+        onPress={getCurrentLocation}
+      >
+        <View
+          style={{
+            backgroundColor: "#333",
+            width: 50,
+            height: 50,
+            borderRadius: 25,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Ionicons name="refresh-sharp" size={28} color="white" />
+        </View>
       </TouchableOpacity>
 
       <Modal
@@ -540,8 +553,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonContainer: {
-    position: 'absolute', 
-    bottom: 10, 
-    left: 10, 
+    position: "absolute",
+    bottom: 10,
+    left: 10,
   },
 });
