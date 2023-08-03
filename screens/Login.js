@@ -11,14 +11,38 @@ import Styles from "../Styles";
 import { auth } from "../firebaseConfig";
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { firestore } from "../firebaseConfig";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  // async function loginUser() {
+  //   try {
+  //     await signInWithEmailAndPassword(auth, email, password);
+  //   } catch (error) {
+  //     Alert.alert("Error!", error.message);
+  //   }
+  // }
   async function loginUser() {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const uid = userCredential.user.uid;
+
+      const db = getFirestore(firestore);
+      const userRef = doc(db, "users", uid);
+      const userSnapshot = await getDoc(userRef);
+
+      if (userSnapshot.exists() && userSnapshot.data().user === "renter") {
+      } else {
+        await auth.signOut();
+        Alert.alert("Error!", "You are not authorized to log in.");
+      }
     } catch (error) {
       Alert.alert("Error!", error.message);
     }
