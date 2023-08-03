@@ -41,7 +41,10 @@ export default function Login() {
       if (userSnapshot.exists() && userSnapshot.data().user === "renter") {
       } else {
         await auth.signOut();
-        Alert.alert("Error!", "You are not authorized to log in.");
+        Alert.alert(
+          "Error!",
+          "You are a owner! Please sign in to the owner app"
+        );
       }
     } catch (error) {
       Alert.alert("Error!", error.message);
@@ -71,7 +74,7 @@ export default function Login() {
             <Text
               style={{ color: "gray", alignSelf: "center", paddingBottom: 40 }}
             >
-              Please sign in to your account
+              Please sign in to your renter account
             </Text>
           </View>
           <View>

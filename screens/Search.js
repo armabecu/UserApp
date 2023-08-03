@@ -165,7 +165,7 @@ export default function Search() {
       // 2. Check if a matching location is found
       const result = geocodedLocation[0];
       if (result === undefined) {
-        alert("No coordinates found");
+        // alert("No coordinates found");
         return;
       }
 
@@ -207,7 +207,7 @@ export default function Search() {
       // 2. Check if a matching location is found
       const result = geocodedLocation[0];
       if (result === undefined) {
-        alert("No coordinates found");
+        // alert("No coordinates found");
         return;
       }
 

@@ -69,7 +69,7 @@ export default function BookingDetail({ route, navigation }) {
       }
     });
 
-    return unsubscribe; // Detach the listener when the component unmounts
+    return unsubscribe;
   }, []);
 
   function getImage(userName) {
@@ -172,9 +172,12 @@ export default function BookingDetail({ route, navigation }) {
             }}
           >
             <Text style={{ fontSize: 30, color: "#fff" }}>Price</Text>
-            <Text style={{ fontSize: 30, color: "#fff" }}>
-              ${booking.price}
-            </Text>
+            <View style={{ flexDirection: "row", alignItems: "baseline" }}>
+              <Text style={{ fontSize: 30, color: "#fff" }}>
+                ${booking.price}
+              </Text>
+              <Text style={{ color: "#999" }}> /week</Text>
+            </View>
           </View>
 
           <View
